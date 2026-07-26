@@ -2,10 +2,37 @@ import { useDebouncedValue } from '@/hooks/useDebounceValue';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+// Hoisted — created once at module load, not on every render
+const inputStyle = {
+  padding: '0.5rem 1rem',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  fontSize: '1rem',
+};
+
+const wrapperStyle = {
+  display: 'flex',
+  gap: '1rem',
+  marginBottom: '2rem',
+  padding: '1.5rem',
+  background: '#fff',
+  borderRadius: '8px',
+  border: '1px solid #e5e7eb',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+};
+
+const resetButtonStyle = {
+  padding: '0.5rem 1rem',
+  background: '#f3f4f6',
+  border: 'none',
+  borderRadius: '8px',
+  cursor: 'pointer',
+  fontWeight: 500,
+};
 
 export const JobFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [position, setPosition] = useState(searchParams.get('position') || '');
   const [experienceRange, setExperienceRange] = useState(searchParams.get('experienceRange') || '');
@@ -19,7 +46,7 @@ export const JobFilters = () => {
     if (position) params.position = position;
     if (experienceRange) params.experienceRange = experienceRange;
     if (status) params.status = status;
-    
+
     setSearchParams(params);
   }, [debouncedSearch, position, experienceRange, status, setSearchParams]);
 
@@ -31,24 +58,8 @@ export const JobFilters = () => {
     setSearchParams({});
   };
 
-  const inputStyle = {
-    padding: '0.5rem 1rem',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '1rem',
-  };
-
   return (
-    <div style={{
-      display: 'flex',
-      gap: '1rem',
-      marginBottom: '2rem',
-      padding: '1.5rem',
-      background: '#fff',
-      borderRadius: '8px',
-      border: '1px solid #e5e7eb',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-    }}>
+    <div style={wrapperStyle}>
       <input
         type="text"
         placeholder="🔍 Search jobs..."
@@ -81,17 +92,7 @@ export const JobFilters = () => {
         <option value="FAILED">Failed</option>
       </select>
 
-      <button 
-        onClick={handleReset}
-        style={{
-          padding: '0.5rem 1rem',
-          background: '#f3f4f6',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontWeight: 500,
-        }}
-      >
+      <button onClick={handleReset} style={resetButtonStyle}>
         Reset
       </button>
     </div>

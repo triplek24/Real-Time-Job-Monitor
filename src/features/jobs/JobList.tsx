@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import {
   useJobsQuery,
   useCancelJobMutation,
@@ -8,6 +9,7 @@ import { Job } from "@/types";
 import styles from "./JobList.module.scss";
 import { JobFilters } from "./jobFliter";
 import { useSearchParams } from "react-router-dom";
+
 export const JobList = () => {
   const [searchParams] = useSearchParams();
 
@@ -22,6 +24,22 @@ export const JobList = () => {
   const { canManageJobs } = useAuth();
   const cancelMutation = useCancelJobMutation();
   const retryMutation = useRetryJobMutation();
+
+  const handleCancel = useCallback(
+    async (jobId: string) => {
+      if (confirm("Are you sure you want to cancel this job?")) {
+        await cancelMutation.mutateAsync(jobId);
+      }
+    },
+    [cancelMutation]
+  );
+
+  const handleRetry = useCallback(
+    async (jobId: string) => {
+      await retryMutation.mutateAsync(jobId);
+    },
+    [retryMutation]
+  );
 
   if (isLoading) {
     return (
@@ -44,16 +62,6 @@ export const JobList = () => {
       </div>
     );
   }
-
-  const handleCancel = async (jobId: string) => {
-    if (confirm("Are you sure you want to cancel this job?")) {
-      await cancelMutation.mutateAsync(jobId);
-    }
-  };
-
-  const handleRetry = async (jobId: string) => {
-    await retryMutation.mutateAsync(jobId);
-  };
 
   return (
     <div className={styles.container}>
@@ -96,14 +104,15 @@ interface JobCardProps {
   isRetrying: boolean;
 }
 
-const JobCard = ({
+// memo() prevents re-render when this specific job's data hasn't changed
+const JobCard = memo(function JobCard({
   job,
   canManage,
   onCancel,
   onRetry,
   isCanceling,
   isRetrying,
-}: JobCardProps) => {
+}: JobCardProps) {
   const getStatusClass = (status: string) => {
     return styles[`status${status.charAt(0) + status.slice(1).toLowerCase()}`];
   };
@@ -122,23 +131,16 @@ const JobCard = ({
       </div>
 
       <div className={styles.jobInfo}>
-        <span>
-          <strong>Position:</strong> {job.position}
-        </span>
-        <span>
-          <strong>Experience:</strong> {job.experience}
-        </span>
+        <span><strong>Position:</strong> {job?.position}</span>
+        <span><strong>Experience:</strong> {job?.experience}</span>
       </div>
 
-      <p className={styles.jobDescription}>{job.description}</p>
+      <p className={styles.jobDescription}>{job?.description}</p>
 
       {job.status === "PROCESSING" && (
         <div className={styles.progressContainer}>
           <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${job.progress}%` }}
-            />
+            <div className={styles.progressFill} style={{ width: `${job.progress}%` }} />
           </div>
           <span className={styles.progressText}>{job.progress}%</span>
         </div>
@@ -152,20 +154,12 @@ const JobCard = ({
       {canManage && (
         <div className={styles.jobActions}>
           {canCancel && (
-            <button
-              onClick={() => onCancel(job.id)}
-              disabled={isCanceling}
-              className={styles.btnCancel}
-            >
+            <button onClick={() => onCancel(job.id)} disabled={isCanceling} className={styles.btnCancel}>
               Cancel
             </button>
           )}
           {canRetry && (
-            <button
-              onClick={() => onRetry(job.id)}
-              disabled={isRetrying}
-              className={styles.btnRetry}
-            >
+            <button onClick={() => onRetry(job.id)} disabled={isRetrying} className={styles.btnRetry}>
               Retry
             </button>
           )}
@@ -173,4 +167,4 @@ const JobCard = ({
       )}
     </div>
   );
-};
+});

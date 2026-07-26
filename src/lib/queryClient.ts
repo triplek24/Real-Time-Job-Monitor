@@ -1,3 +1,4 @@
+// queryClient.ts
 import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
@@ -14,19 +15,22 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Query keys factory
+interface JobListFilters {
+  search?: string;
+  position?: string;
+  experienceRange?: string;
+  status?: string;
+}
+
 export const queryKeys = {
   jobs: {
     all: ['jobs'] as const,
     lists: () => [...queryKeys.jobs.all, 'list'] as const,
-    list: (page: number) => [...queryKeys.jobs.lists(), page] as const,
+    list: (filters: JobListFilters = {}) => [...queryKeys.jobs.lists(), filters] as const,
     details: () => [...queryKeys.jobs.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.jobs.details(), id] as const,
   },
   metrics: {
     all: ['metrics'] as const,
-  },
-  user: {
-    me: ['user', 'me'] as const,
   },
 };

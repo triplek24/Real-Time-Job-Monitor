@@ -2,10 +2,13 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
 import { Metrics } from '@/types';
+import { jobsApi } from '@/api/jobs.api';
 
 export const useJobMetrics = () => {
-  const { data: jobsData } = useQuery({
-    queryKey: queryKeys.jobs.list(1),
+const { data: jobsData } = useQuery({
+    queryKey: queryKeys.jobs.list({}), // matches JobList when no filters active
+    queryFn: () => jobsApi.getJobs({}),
+    staleTime: 30000,
   });
 
   const { data: sseMetrics } = useQuery<Metrics>({

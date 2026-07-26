@@ -29,7 +29,7 @@ export const LoginPage = () => {
       const message = err?.response?.data?.message || 'Login failed. Please try again.';
       setError(message);
     } finally {
-      // setIsLoading(false);
+ setIsLoading(false);
     }
   };
 
