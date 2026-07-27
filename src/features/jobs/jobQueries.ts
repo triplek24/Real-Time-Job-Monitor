@@ -1,16 +1,8 @@
+// jobQueries.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { jobsApi } from "@/api/jobs.api";
 import { queryKeys } from "@/lib/queryClient";
-import { Job } from "@/types";
-
-interface JobFilters {
-  page?: number;
-  search?: string;
-  position?: string;
-  experienceRange?: string;
-  status?: string;
-}
-
+import { Job, JobFilters } from "@/types"; // shared type, not redeclared locally
 
 export const useJobsQuery = (filters: JobFilters = {}) => {
   return useQuery({
@@ -19,6 +11,7 @@ export const useJobsQuery = (filters: JobFilters = {}) => {
     staleTime: 0,
   });
 };
+
 export const useCreateJobMutation = () => {
   const queryClient = useQueryClient();
 
@@ -29,17 +22,9 @@ export const useCreateJobMutation = () => {
       experience: string;
       description: string;
     }) => jobsApi.createJob(data),
-    onSuccess: (newJob) => {
-      queryClient.setQueryData(queryKeys.jobs.list(1), (oldData: any) => {
-        if (!oldData) return oldData;
-
-        return {
-          ...oldData,
-          jobs: [newJob, ...oldData.jobs],
-          total: oldData.total + 1,
-        };
-      });
-      queryClient.getQueriesData({ queryKey: queryKeys.jobs.lists() });
+    onSuccess: () => {
+      // Simpler and correct — refetch whatever filtered view is currently active,
+      // rather than guessing which cached list entry to manually splice into.
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.lists() });
     },
     onError: (error: unknown) => {
@@ -72,23 +57,23 @@ export const useRetryJobMutation = () => {
     onSuccess: (updatedJob) => {
       updateJobInCache(queryClient, updatedJob);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Failed to retry job:", error);
     },
   });
 };
 
-const updateJobInCache = (queryClient: any, updatedJob: Job) => {
-  const queries = queryClient.getQueriesData({
+const updateJobInCache = (queryClient: ReturnType<typeof useQueryClient>, updatedJob: Job) => {
+  const queries = queryClient.getQueriesData<{ jobs: Job[]; total: number }>({
     queryKey: queryKeys.jobs.lists(),
   });
 
-  queries.forEach(([queryKey, oldData]: [any, any]) => {
+  queries.forEach(([queryKey, oldData]) => {
     if (!oldData?.jobs) return;
 
     queryClient.setQueryData(queryKey, {
       ...oldData,
-      jobs: oldData.jobs.map((job: Job) =>
+      jobs: oldData.jobs.map((job) =>
         job.id === updatedJob.id ? updatedJob : job,
       ),
     });

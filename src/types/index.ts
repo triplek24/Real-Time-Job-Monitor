@@ -6,20 +6,30 @@ export interface User {
   email: string;
   role: UserRole;
 }
-
+export interface JobFilters {
+  page?: number;
+  search?: string;
+  position?: string;
+  experienceRange?: string;
+  status?: string;
+}
 // Job types
 export type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
+// src/types/index.ts
 export interface Job {
   id: string;
   title: string;
-  status: JobStatus;
+  position: 'JUNIOR' | 'MIDDLE' | 'SENIOR' | 'STAFF';
+  experience: string;
+  description: string;
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   progress: number;
   createdById: string;
   creator?: {
     id: string;
     email: string;
-    role: UserRole;
+    role: 'ADMIN' | 'OPERATOR' | 'VIEWER';
   };
   createdAt: string;
   updatedAt: string;

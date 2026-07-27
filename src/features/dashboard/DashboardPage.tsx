@@ -7,14 +7,16 @@ import { MetricsCard } from './MetricsCard';
 import styles from './DashboardPage.module.scss';
 
 // Module-level — created once, not per render
-const CreateJobForm = lazy(() => import('@/features/jobs/CreateJobForm'));
+const CreateJobForm = lazy(() =>
+  import('@/features/jobs/CreateJobForm').then((module) => ({ default: module.CreateJobForm }))
+);
 
 export const DashboardPage = () => {
   const { user, canCreateJob } = useAuth();
   const metrics = useJobMetrics();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [sseStatus, setSseStatus] = useState<'connected' | 'disconnected'>('disconnected');
-  const statusTimeoutRef = useRef<number>();
+ const statusTimeoutRef = useRef<number | undefined>(undefined);
 
   useSSE({
     enabled: true,
