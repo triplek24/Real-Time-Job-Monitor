@@ -1,7 +1,13 @@
 import { apiClient } from './axios';
 import { ApiResponse, Job, PaginatedResponse } from '@/types';
 
-
+interface JobFilters {
+  page?: number;
+  search?: string;
+  position?: string;
+  experienceRange?: string;
+  status?: string;
+}
 export const jobsApi = {
 //  getJobs: async (filters: any = {}): Promise<PaginatedResponse<Job>> => {
 //     const params = new URLSearchParams();
